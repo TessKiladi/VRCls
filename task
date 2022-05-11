@@ -1,0 +1,27 @@
+#!/bin/bash
+
+function Task:build,fltk {
+    mkdir -p tmp/fltk
+    git submodule foreach git checkout .
+    git submodule foreach git clean -xfd
+    # patch -p1 -d fltk < tools/patches/fltk-fix.patch
+    LDFLAGS="--static" cmake -G "MSYS Makefiles" -DOPTION_USE_SYSTEM_ZLIB=OFF -DOPTION_USE_SYSTEM_LIBJPEG=OFF -DOPTION_USE_SYSTEM_LIBPNG=OFF -S fltk -B tmp/fltk
+    make -C tmp/fltk --jobs=10
+}
+function Task:build {
+    Task:build,fltk
+}
+function Task:clean {
+    rm -r tmp
+    git submodule foreach git checkout .
+}
+function Task:cleanbuild {
+    Task:clean
+    Task:build
+}
+
+function Task:default {
+    echo errr....
+}
+
+Task:${@:-default}
