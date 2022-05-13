@@ -8,8 +8,20 @@ function Task:build,fltk {
     LDFLAGS="--static" cmake -G "MSYS Makefiles" -DOPTION_USE_SYSTEM_ZLIB=OFF -DOPTION_USE_SYSTEM_LIBJPEG=OFF -DOPTION_USE_SYSTEM_LIBPNG=OFF -S fltk -B tmp/fltk
     make -C tmp/fltk --jobs=10
 }
+function Task:build,app {
+    mkdir -p tmp/vrcls
+    meson setup tmp/vrcls && meson compile -C tmp/vrcls -v
+}
+function Task:VerifyEnv {
+    [ "$(which meson)" = "/mingw64/bin/meson" ] || echo "meson missing" || exit 1
+    [ "$(which ninja)" = "/mingw64/bin/ninja" ] || echo "ninja missing" || exit 1
+    [ "$(which g++)" = "/mingw64/bin/g++" ]     || echo "g++ missing"   || exit 1
+    [ -f "/msys2.ini" ] || echo "Not an msys2 environment!" || exit 1
+}
 function Task:build {
-    Task:build,fltk
+    Task:VerifyEnv
+    [ -f "tmp/fltk/lib/libfltk.a" ] || Task:build,fltk # fltk is static and does not need rebuilding if it exists.
+    Task:build,app
 }
 function Task:clean {
     rm -r tmp
