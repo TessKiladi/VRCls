@@ -23,6 +23,9 @@ function Task:build {
     [ -f "tmp/fltk/lib/libfltk.a" ] || Task:build,fltk # fltk is static and does not need rebuilding if it exists.
     Task:build,app
 }
+function Task:run {
+    tmp/vrcls/vrcls.exe
+}
 function Task:clean {
     rm -r tmp
     git submodule foreach git checkout .
@@ -36,4 +39,4 @@ function Task:default {
     echo errr....
 }
 
-Task:${@:-default}
+time Task:${@:-default}
