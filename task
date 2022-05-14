@@ -2,9 +2,6 @@
 
 function Task:build,fltk {
     mkdir -p tmp/fltk
-    git submodule foreach git checkout .
-    git submodule foreach git clean -xfd
-    # patch -p1 -d fltk < tools/patches/fltk-fix.patch
     LDFLAGS="--static" cmake -G "MSYS Makefiles" -DOPTION_USE_SYSTEM_ZLIB=OFF -DOPTION_USE_SYSTEM_LIBJPEG=OFF -DOPTION_USE_SYSTEM_LIBPNG=OFF -S fltk -B tmp/fltk
     make -C tmp/fltk --jobs=10
 }
@@ -22,21 +19,41 @@ function Task:build {
     Task:VerifyEnv
     [ -f "tmp/fltk/lib/libfltk.a" ] || Task:build,fltk # fltk is static and does not need rebuilding if it exists.
     Task:build,app
+    doNextTask ${@}
 }
 function Task:run {
     tmp/vrcls/vrcls.exe
+    doNextTask ${@}
+}
+function Task:deepclean
+{
+    rm -r tmp
 }
 function Task:clean {
-    rm -r tmp
-    git submodule foreach git checkout .
+    rm -r tmp/vrcls
+    doNextTask ${@}
 }
-function Task:cleanbuild {
-    Task:clean
-    Task:build
+function Task:loop {
+    function ctrl_c {
+        loopctrl=0
+        echo "ctrl-c pressed..."
+    }
+    trap ctrl_c INT
+    loopctrl=1
+    while [ "${loopctrl}" = "1" ]; do
+        doNextTask ${@}
+        [ "$?" != "0" ] && loopctrl=0 && exit 1
+    done
 }
 
 function Task:default {
     echo errr....
+}
+
+function doNextTask {
+    if [ "$#" != "0" ]; then
+        Task:${@}
+    fi
 }
 
 time Task:${@:-default}
