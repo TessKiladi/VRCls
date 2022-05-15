@@ -1,3 +1,7 @@
+#include "UserList.h"
+#include "LogFinder.h"
+#include "LogScanner.h"
+
 #include <Fl/Fl.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Browser.H>
@@ -9,6 +13,9 @@ class MainForm : public Fl_Double_Window
     public:
     MainForm()
     : Fl_Double_Window(640, 480, "VRCls")
+    , _theUserList  ()
+    , _LastLog("")
+    , _LastLogPosition(0)
     , _lblStaff     (  4,   4, 155,  20, "Staff")
     , _Staff        (  4,  25, 155, 425, 0)
     , _lblGuest     (163,   4, 155,  20, "Guest")
@@ -23,12 +30,32 @@ class MainForm : public Fl_Double_Window
     , _Quit         (481, 454, 155,  20, "Quit")
     {
         _Quit.callback(&_cbQuit, this);
+        Fl::add_timeout(0.5, &_timerFunc, this);
     }
     private:
     static void _cbQuit(Fl_Widget * w, void* p)
     {
         static_cast<MainForm*>(p)->hide();
     }
+    static void _timerFunc(void* p)
+    {
+        static_cast<MainForm*>(p)->_timerFunc();
+    }
+    void _timerFunc()
+    {
+        std::filesystem::path mrl{IdentifyMostRecentLog()};
+        if (mrl != _LastLog)
+        {
+            _LastLogPosition = 0;
+            _LastLog = mrl;
+        }
+        _LastLogPosition = ScanLog("c:/Users/tess/AppData/LocalLow/VRChat/VRChat/output_log_01-51-48.txt", _LastLogPosition, _theUserList);
+        _theUserList.dump();
+        // Fl::repeat_timeout(5.0, &_timerFunc, this);
+    }
+    UserList _theUserList;
+    std::filesystem::path _LastLog;
+    size_t _LastLogPosition;
     Fl_Box _lblStaff;
     Fl_Browser _Staff;
     Fl_Box _lblGuest;

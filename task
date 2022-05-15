@@ -6,8 +6,8 @@ function Task:build,fltk {
     make -C tmp/fltk --jobs=10
 }
 function Task:build,app {
-    mkdir -p tmp/vrcls
-    meson setup tmp/vrcls && meson compile -C tmp/vrcls -v
+    [ -f "tmp/vrcls/build.ninja" ] || meson setup tmp/vrcls
+    meson compile -C tmp/vrcls -v
 }
 function Task:VerifyEnv {
     [ "$(which meson)" = "/mingw64/bin/meson" ] || echo "meson missing" || exit 1

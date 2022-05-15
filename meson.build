@@ -1,6 +1,8 @@
-project('vrcls', 'cpp')
+project('vrcls', 'cpp', default_options:['cpp_std=c++20', 'warning_level=3', 'werror=true'])
 srcs = [
     'src/MainForm.cpp',
+    'src/LogScanner.cpp',
+    'src/LogFinder.cpp',
     ]
 includedirs = [
     ]
@@ -17,6 +19,8 @@ fltklibs = [
 fltk_inc = include_directories(['fltk', 'tmp/fltk'])
 add_project_link_arguments('-static', language: 'cpp')
 add_project_link_arguments('-lcomctl32', language: 'cpp')
-add_project_arguments('-std=c++20', language: 'cpp')
+# add_project_arguments('-Wall', language: 'cpp')
+# add_project_arguments('-Wextra', language: 'cpp') # FLTK headers do not build with -Wextra
+# add_project_arguments('-Werror', language: 'cpp')
 
-executable('vrcls', sources: [files(srcs)], include_directories: [include_directories(includedirs), fltk_inc], dependencies: [fltklibs])
+executable('vrcls', sources: [files(srcs)], include_directories: [include_directories(includedirs), fltk_inc], dependencies: [fltklibs]) #, gui_app: true
