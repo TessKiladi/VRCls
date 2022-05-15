@@ -23,4 +23,4 @@ add_project_link_arguments('-lcomctl32', language: 'cpp')
 # add_project_arguments('-Wextra', language: 'cpp') # FLTK headers do not build with -Wextra
 # add_project_arguments('-Werror', language: 'cpp')
 
-executable('vrcls', sources: [files(srcs)], include_directories: [include_directories(includedirs), fltk_inc], dependencies: [fltklibs]) #, gui_app: true
+executable('vrcls', sources: [files(srcs)], include_directories: [include_directories(includedirs), fltk_inc], dependencies: [fltklibs], gui_app: true) #, gui_app: true

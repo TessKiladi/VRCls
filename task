@@ -18,8 +18,7 @@ function Task:VerifyEnv {
 function Task:build {
     Task:VerifyEnv
     [ -f "tmp/fltk/lib/libfltk.a" ] || Task:build,fltk # fltk is static and does not need rebuilding if it exists.
-    Task:build,app
-    doNextTask ${@}
+    Task:build,app && doNextTask ${@}
 }
 function Task:run {
     tmp/vrcls/vrcls.exe

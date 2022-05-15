@@ -32,9 +32,10 @@ void ProcessLine(std::string& line, UserList& theUserList)
     }
 }
 
-size_t ScanLog(std::string LogFile, size_t StartPoint, UserList& theUserList)
+size_t ScanLog(std::filesystem::path LogFile, size_t StartPoint, UserList& theUserList)
 {
-    size_t EndPoint{0};
+    // std::cout << "opening " << LogFile << " @ " << StartPoint << std::endl;
+    size_t EndPoint{StartPoint};
     std::ifstream TheLog(LogFile.c_str());
     if (TheLog.is_open())
     {
