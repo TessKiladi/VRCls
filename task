@@ -20,6 +20,12 @@ function Task:build {
     [ -f "tmp/fltk/lib/libfltk.a" ] || Task:build,fltk # fltk is static and does not need rebuilding if it exists.
     Task:build,app && doNextTask ${@}
 }
+function Task:strip {
+    strip tmp/vrcls/vrcls.exe && doNextTask ${@}
+}
+function Task:debug {
+    gdb tmp/vrcls/vrcls.exe && doNextTask ${@}
+}
 function Task:run {
     tmp/vrcls/vrcls.exe
     doNextTask ${@}

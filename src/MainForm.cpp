@@ -7,8 +7,10 @@
 #include <FL/Fl_Browser.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
+#include <windows.h>
 
 #include <iostream>
+extern HINSTANCE fl_display;
 
 class UserBrowser : public Fl_Browser, public Fl_Box
 {
@@ -27,7 +29,14 @@ class UserBrowser : public Fl_Browser, public Fl_Box
     void remove(UserList::UserDetails* who){
         if (who)
         {
-            Fl_Browser::remove(Fl_Browser::lineno(who));
+            for (int i{0}; i <= Fl_Browser::size(); ++i)
+            {
+                if (static_cast<void*>(who) == data(i))
+                {
+                    Fl_Browser::remove(i);
+                }
+            }
+            Fl_Browser::redraw();
             who->displayList = 0;
         }
     }
@@ -35,6 +44,7 @@ class UserBrowser : public Fl_Browser, public Fl_Box
         if (who && (who->displayList == nullptr))
         {
             who->displayList = this;
+            // std::cout << _name << ": adding " << user << std::endl;
             Fl_Browser::add(user.c_str(), who);
         }
     }
@@ -64,6 +74,7 @@ class MainForm : public Fl_Double_Window
     , _Quit         (481, 454, 155,  20, "Quit")
     , _listAssociation()
     {
+        Fl_Double_Window::icon((char*)LoadIcon(fl_display, MAKEINTRESOURCE(0)));
         _Quit.callback(&_cbQuit, this);
         _listAssociation.insert(std::make_pair(_Staff.GetName(), &_Staff));
         _listAssociation.insert(std::make_pair(_Guest.GetName(), &_Guest));
@@ -94,22 +105,33 @@ class MainForm : public Fl_Double_Window
             if (user.second)
             {
                 // std::cout << "User \"" << user.first << "\" for category " << user.second->category<<  std::endl;
-                auto iter{_listAssociation.find(user.second->category)};
-                if (iter != _listAssociation.end()) //Category is known
+                if (user.second->category == "remove") //this user is no-more, eliminate them
                 {
-                    if ( user.second->displayList == iter->second)
+                    if (user.second->displayList)//only remove from list if actually in a list...
                     {
-                        //already in the right list, no action
-                    }
-                    else if (user.second->displayList != nullptr)
-                    {
-                        //wrong list, remove from old and add to new.
                         static_cast<UserBrowser*>(user.second->displayList)->remove(user.second);
-                        static_cast<UserBrowser*>(iter->second)->add(user.first, user.second);
                     }
-                    else
+                    _theUserList.purgeUser(user.first);
+                }
+                else//shuffle and add
+                {
+                    auto iter{_listAssociation.find(user.second->category)};
+                    if (iter != _listAssociation.end()) //Category is known
                     {
-                        static_cast<UserBrowser*>(iter->second)->add(user.first, user.second);
+                        if ( user.second->displayList == iter->second)
+                        {
+                            //already in the right list, no action
+                        }
+                        else if (user.second->displayList != nullptr)
+                        {
+                            //wrong list, remove from old and add to new.
+                            static_cast<UserBrowser*>(user.second->displayList)->remove(user.second);
+                            static_cast<UserBrowser*>(iter->second)->add(user.first, user.second);
+                        }
+                        else
+                        {
+                            static_cast<UserBrowser*>(iter->second)->add(user.first, user.second);
+                        }
                     }
                 }
             }

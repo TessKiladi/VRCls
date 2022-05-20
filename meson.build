@@ -1,4 +1,5 @@
-project('vrcls', 'cpp', default_options:['cpp_std=c++20', 'warning_level=3', 'werror=true'])
+project('vrcls', 'cpp', default_options:['cpp_std=c++20', 'warning_level=1', 'werror=true'])
+windows = import('windows')
 srcs = [
     'src/MainForm.cpp',
     'src/LogScanner.cpp',
@@ -22,5 +23,8 @@ add_project_link_arguments('-lcomctl32', language: 'cpp')
 # add_project_arguments('-Wall', language: 'cpp')
 # add_project_arguments('-Wextra', language: 'cpp') # FLTK headers do not build with -Wextra
 # add_project_arguments('-Werror', language: 'cpp')
+add_project_arguments('-ggdb', language: 'cpp')
+add_project_link_arguments('-ggdb', language: 'cpp')
+Res = windows.compile_resources('src/resources.rc', depend_files: ['src/favicon.ico'])
 
-executable('vrcls', sources: [files(srcs)], include_directories: [include_directories(includedirs), fltk_inc], dependencies: [fltklibs], gui_app: true) #, gui_app: true
+executable('vrcls', sources: [files(srcs), Res], include_directories: [include_directories(includedirs), fltk_inc], dependencies: [fltklibs], gui_app: true) #, gui_app: true
